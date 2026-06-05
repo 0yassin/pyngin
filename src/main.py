@@ -1,55 +1,106 @@
+from converter import convert_fen
 import pygame
 from board import Board
-
-
-
-
-
-pygame.init()
-
+import os
 
 dark = (0,0,0)
 light = (255,255,255)
-
 sq_size = 60
 
-font = pygame.font.SysFont("Arial", 40)
-
-
-
-board = Board()
-
-screen = pygame.display.set_mode((720, sq_size*8))
+pygame.init()
+screen = pygame.display.set_mode((540, sq_size*8))
 clock = pygame.time.Clock()
 running = True
+font = pygame.font.SysFont("Arial", 40)
+
+board = Board()
+position = "rnbq1bnr/ppp2ppp/5k2/1B2p3/3pP3/2P5/PPP1NPPP/R1BQK1NR w KQ - 0 1"
+convert_fen(position, board)
+
+gui_pieces_paths = {
+    1: "assets/wp.png",
+    2: "assets/wn.png",
+    3: "assets/wb.png",
+    4: "assets/wr.png",
+    5: "assets/wq.png",
+    6: "assets/wk.png",
+
+    -1: "assets/bp.png",
+    -2: "assets/bn.png",
+    -3: "assets/bb.png",
+    -4: "assets/br.png",
+    -5: "assets/bq.png",
+    -6: "assets/bk.png"
+}
+
+gui_pieces_table = {}
+
+def load_game_assets():
+    for piece_value, path in gui_pieces_paths.items():
+        try:
+            raw_image = pygame.image.load(path).convert_alpha()
+            scaled_image = pygame.transform.smoothscale(raw_image, (sq_size, sq_size))
+            gui_pieces_table[piece_value] = scaled_image
+        except pygame.error as e:
+            print(f"Error loading asset {path}: {e}")
+
+load_game_assets()
+
+selected_square = None
+selected_piece = (None, None)
+possible_moves = board.get_possible_moves(board.state)
 
 
 while running:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if mouse_x >= 60:
+                c = (mouse_x - 60) // sq_size
+                r = mouse_y // sq_size
+
+                
+                if (selected_square, (r*8) + c ) in possible_moves:
+                        board.make_move((selected_square, (r*8) + c))
+                        selected_piece = (None, None)
+                        selected_square = None
+                        possible_moves = board.get_possible_moves(board.state)
+                else:
+                    selected_square = (r * 8) + c
+                    
+                    if board.state[selected_square] > 0:
+                        selected_piece = (selected_square, board.state[selected_square])
+                    else:
+                        selected_piece = (None, None)
+
 
     screen.fill("purple")
 
 
     for r in range(8):
         for c in range(8):
-            if (r+c) % 2 == 0:
-                color = light
+
+            if selected_piece[0] != r*8+c:
+                if (r+c) % 2 == 0:
+                    color = light
+                else:
+                    color=dark
+
             else:
-                color=dark
+                color= "purple"  
+
+
             
+            xpos_ = c*sq_size+60 
+            ypos_ = r*sq_size
+            gui_board = pygame.draw.rect(screen, color, (xpos_, ypos_, sq_size, sq_size))
+            index = (r*8)+c            
 
-            gui_board = pygame.draw.rect(screen, color, (c*sq_size+60, r*sq_size, sq_size, sq_size))
-            index = (r*8)+c
-            text_surface = font.render(str(board.state[index]), True, "purple")
-
-
-            screen.blit(text_surface, (c*sq_size+60, r*sq_size))
-
-
-
+            if gui_pieces_table.get(board.state[index]):
+                screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
 
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))

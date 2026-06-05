@@ -15,8 +15,13 @@ class Board:
 
         self.en_passant_square = None
 
-    def possible_moves(self, state):
-        return 
+        self.move_n = 1
 
+    def get_possible_moves(self, state):
+        return []
+
+    def make_move(self, state, move):
+        print(f"made move: {move}")
+        return
     
     
