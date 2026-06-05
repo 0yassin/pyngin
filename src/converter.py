@@ -39,6 +39,8 @@ def convert_fen(fen:str, board:Board):
         board.white_to_move = True
     else:
         board.white_to_move = False
+    
+    board.turn = parts[1]
 
     if "K" in parts[2]:
         board.castling_rights['wk'] = True
@@ -54,5 +56,6 @@ def convert_fen(fen:str, board:Board):
     if parts[3] != "-":
         board.en_passant_square = parts[3]
     
-    board.move_n = parts[5] 
+
+    board.move_n = parts[5]
 

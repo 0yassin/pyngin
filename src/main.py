@@ -1,8 +1,7 @@
 from converter import convert_fen
 import pygame
 from board import Board
-import os
-
+from moves import is_current_turn_piece
 dark = (0,0,0)
 light = (255,255,255)
 sq_size = 60
@@ -14,7 +13,7 @@ running = True
 font = pygame.font.SysFont("Arial", 40)
 
 board = Board()
-position = "rnbq1bnr/ppp2ppp/5k2/1B2p3/3pP3/2P5/PPP1NPPP/R1BQK1NR w KQ - 0 1"
+position = "rnbqkb1r/pppppppp/5n2/2n4n/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"
 convert_fen(position, board)
 
 gui_pieces_paths = {
@@ -48,7 +47,9 @@ load_game_assets()
 
 selected_square = None
 selected_piece = (None, None)
-possible_moves = board.get_possible_moves(board.state)
+possible_moves = board.get_possible_moves()
+
+play_as = "w"
 
 
 while running:
@@ -59,23 +60,24 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if mouse_x >= 60:
-                c = (mouse_x - 60) // sq_size
-                r = mouse_y // sq_size
+                if play_as == board.turn:
+                    c = (mouse_x - 60) // sq_size
+                    r = mouse_y // sq_size
 
-                
-                if (selected_square, (r*8) + c ) in possible_moves:
-                        board.make_move((selected_square, (r*8) + c))
-                        selected_piece = (None, None)
-                        selected_square = None
-                        possible_moves = board.get_possible_moves(board.state)
-                else:
-                    selected_square = (r * 8) + c
                     
-                    if board.state[selected_square] > 0:
-                        selected_piece = (selected_square, board.state[selected_square])
+                    if (selected_square, (r*8) + c ) in possible_moves:
+                            board.make_move((selected_square, (r*8) + c))
+                            selected_piece = (None, None)
+                            selected_square = None
+                            possible_moves = board.get_possible_moves()
                     else:
-                        selected_piece = (None, None)
+                        selected_square = (r * 8) + c
 
+                        if is_current_turn_piece(board.state[selected_square], play_as):
+                            selected_piece = (selected_square, board.state[selected_square])
+
+                        else:
+                            selected_piece = (None, None)
 
     screen.fill("purple")
 
@@ -102,6 +104,7 @@ while running:
             if gui_pieces_table.get(board.state[index]):
                 screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
 
+    print(possible_moves)
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))
 
