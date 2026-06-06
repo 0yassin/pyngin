@@ -13,7 +13,7 @@ running = True
 font = pygame.font.SysFont("Arial", 40)
 
 board = Board()
-position = "rnbqkb1r/pppppppp/5n2/2n4n/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"
+position = "6n1/3r2b1/1b6/8/8/1R3N2/3B4/8 b - - 0 1"
 convert_fen(position, board)
 
 gui_pieces_paths = {
@@ -49,7 +49,7 @@ selected_square = None
 selected_piece = (None, None)
 possible_moves = board.get_possible_moves()
 
-play_as = "w"
+play_as = "b"
 
 
 while running:
@@ -82,18 +82,22 @@ while running:
     screen.fill("purple")
 
 
+
+
     for r in range(8):
         for c in range(8):
-
-            if selected_piece[0] != r*8+c:
-                if (r+c) % 2 == 0:
-                    color = light
-                else:
-                    color=dark
-
+            index = (r * 8) + c
+            if (r + c) % 2 == 0:
+                color = light
             else:
-                color= "purple"  
+                color = dark
 
+            if selected_piece[0] is not None:
+                if (selected_piece[0], index) in possible_moves:
+                    color = (100, 100,100)
+            
+            if selected_piece[0] == index:
+                color = "purple"
 
             
             xpos_ = c*sq_size+60 
@@ -102,9 +106,13 @@ while running:
             index = (r*8)+c            
 
             if gui_pieces_table.get(board.state[index]):
+                # pyrefly: ignore [bad-argument-type]
                 screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
 
-    print(possible_moves)
+
+
+    print(selected_piece)
+    print(selected_square)
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))
 

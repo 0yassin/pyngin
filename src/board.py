@@ -28,10 +28,11 @@ class Board:
         print(f"made move: {move}")
         # starting square
         self.state[move[1]] = self.state[move[0]] 
+        captured_piece = self.state[move[1]]
         self.state[move[0]] = 0
         if self.turn == 'w':
             self.turn = 'b'
         else:
             self.turn = "w"
-        return move
+        return move, captured_piece
     
