@@ -2,6 +2,8 @@ from converter import convert_fen
 import pygame
 from board import Board
 from moves import is_current_turn_piece
+
+play_as = "w"
 dark = (0,0,0)
 light = (255,255,255)
 sq_size = 60
@@ -44,27 +46,20 @@ def load_game_assets():
             print(f"Error loading asset {path}: {e}")
 
 load_game_assets()
-
 selected_square = None
 selected_piece = (None, None)
 possible_moves = board.get_possible_moves()
-
-play_as = "w"
-
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if mouse_x >= 60:
-                if play_as == board.turn:
+                #CHANGED FOR DEBUG
+                # if play_as == board.turn:
                     c = (mouse_x - 60) // sq_size
                     r = mouse_y // sq_size
-
-                    
                     if (selected_square, (r*8) + c ) in possible_moves:
                             board.make_move((selected_square, (r*8) + c))
                             selected_piece = (None, None)
@@ -72,18 +67,13 @@ while running:
                             possible_moves = board.get_possible_moves()
                     else:
                         selected_square = (r * 8) + c
-
-                        if is_current_turn_piece(board.state[selected_square], play_as):
+                        # CHANGED FOR DEBUG: board.turn instead of play_as
+                        if is_current_turn_piece(board.state[selected_square], board.turn):
                             selected_piece = (selected_square, board.state[selected_square])
 
                         else:
                             selected_piece = (None, None)
-
     screen.fill("purple")
-
-
-
-
     for r in range(8):
         for c in range(8):
             index = (r * 8) + c
@@ -91,15 +81,11 @@ while running:
                 color = light
             else:
                 color = dark
-
             if selected_piece[0] is not None:
                 if (selected_piece[0], index) in possible_moves:
                     color = (100, 100,100)
-            
             if selected_piece[0] == index:
                 color = "purple"
-
-            
             xpos_ = c*sq_size+60 
             ypos_ = r*sq_size
             gui_board = pygame.draw.rect(screen, color, (xpos_, ypos_, sq_size, sq_size))
@@ -109,15 +95,11 @@ while running:
                 # pyrefly: ignore [bad-argument-type]
                 screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
 
-
-
-    print(selected_piece)
-    print(selected_square)
+    # print(selected_piece)
+    # print(selected_square)
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))
-
     pygame.display.flip()
-
     clock.tick(60)
 
 pygame.quit()
