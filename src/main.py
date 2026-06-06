@@ -13,7 +13,7 @@ running = True
 font = pygame.font.SysFont("Arial", 40)
 
 board = Board()
-position = "6n1/3r2b1/1b6/8/8/1R3N2/3B4/8 b - - 0 1"
+position = "8/8/4R3/8/3n4/2n1N1n1/2Q1RP1P/K4N2 w - - 0 1"
 convert_fen(position, board)
 
 gui_pieces_paths = {
@@ -49,7 +49,7 @@ selected_square = None
 selected_piece = (None, None)
 possible_moves = board.get_possible_moves()
 
-play_as = "b"
+play_as = "w"
 
 
 while running:
