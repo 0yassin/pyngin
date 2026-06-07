@@ -15,7 +15,7 @@ piece_table = {
 }
 
 
-def convert_fen(fen:str, board):
+def load_fen(fen:str, board):
     parts = fen.split(" ")
     ranks = parts[0].split("/")
     curr_square = 0

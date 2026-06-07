@@ -1,4 +1,4 @@
-from converter import convert_fen
+from converter import load_fen
 import pygame
 from board import Board
 from moves import is_current_turn_piece
@@ -16,7 +16,7 @@ font = pygame.font.SysFont("Arial", 40)
 
 board = Board()
 position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-convert_fen(position, board)
+load_fen(position, board)
 
 gui_pieces_paths = {
     1: "assets/wp.png",
@@ -94,10 +94,6 @@ while running:
             if gui_pieces_table.get(board.state[index]):
                 # pyrefly: ignore [bad-argument-type]
                 screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
-
-    # print(selected_piece)
-    print(board.castling_rights)
-    # print(selected_square)
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))
     pygame.display.flip()
