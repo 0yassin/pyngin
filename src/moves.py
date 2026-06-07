@@ -89,8 +89,14 @@ def get_pawn_moves(board, index):
             continue
         if abs((tar_square % 8) - (index % 8)) != 1:
             continue
+
         turn = 'w' if board.state[index] > 0 else 'b'
-        if board.state[tar_square] == 0 or is_current_turn_piece(board.state[tar_square], turn):
+        if board.state[tar_square] == 0 :
+            if board.en_passant_target is not None and tar_square == board.en_passant_target:
+                res.append((index, tar_square))
+            continue
+
+        if is_current_turn_piece(board.state[tar_square], turn):
             continue
         res.append((index, tar_square))
     return res
@@ -124,6 +130,19 @@ def get_queen_moves(board, index):
 def get_king_moves(board, index):
     offsets = [-8, 8, -1, 1,-9, -7, 9, 7]
     res = []
+    if board.turn == "w" and index == 60:
+        if board.castling_rights['wk'] and board.state[61] == 0 and board.state[62] == 0:
+            res.append((60, 62))
+        if board.castling_rights['wq'] and board.state[59] == 0 and board.state[58] == 0 and board.state[57] == 0:
+            res.append((60, 58))
+
+    if board.turn == "b" and index == 4:
+        if board.castling_rights['bk'] and board.state[5] == 0 and board.state[6] == 0:
+            res.append((4, 6))
+        if board.castling_rights['bq'] and board.state[3] == 0 and board.state[2] == 0 and board.state[1] == 0:
+            res.append((4, 2))
+
+
     start_col = index % 8
     for offset in offsets:
         tar_square = index + offset
@@ -159,7 +178,50 @@ def get_psudo_moves(board):
             if abs(piece) == 6:
                 p_moves.extend(get_king_moves(board, i))
     return p_moves
-    
+
+def get_legal_moves(board):
+    legal_moves = []
+    psuedo_moves = get_psudo_moves(board)
+    curent_turn = board.turn
+    opponent_turn = 'b' if board.turn == 'w' else 'w'
+
+    for move in psuedo_moves:
+        start, end = move
+        temp_state = list(board.state)
+        piece_moving = board.state[start]
+        is_castling_move = (abs(piece_moving) == 6 and abs(start - end) == 2)
+
+        board.state[end] = board.state[start]
+        board.state[start] = 0
+
+        if abs(piece_moving) == 1 and (start % 8 != end % 8) and temp_state[end] == 0:
+            victim_square = end + 8 if piece_moving > 0 else end - 8
+            board.state[victim_square] = 0
+
+        board.turn = opponent_turn
+
+        king_value = 6 if curent_turn == "w" else -6
+        king_index = board.state.index(king_value)
+        enemy_responses = get_psudo_moves(board)
+        king_is_safe = True
+        for enemy_move in enemy_responses:
+            enemy_start, enemy_end = enemy_move
+            if enemy_end == king_index:
+                king_is_safe = False
+                break
+            if is_castling_move:
+                transit_square = (start + end) // 2
+                if enemy_end == start or enemy_end == transit_square:
+                    king_is_safe = False
+                    break
+
+        if king_is_safe:
+            legal_moves.append(move)
+
+        board.state = temp_state
+        board.turn = curent_turn
+    return legal_moves
+
 def is_current_turn_piece(piece, turn):
     # piece > 0 means white
     if piece > 0 and turn == "w":

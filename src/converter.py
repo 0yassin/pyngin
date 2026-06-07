@@ -1,9 +1,3 @@
-import pieces
-from board import Board
-
-board = Board()
-
-
 piece_table = {
     "p":-1,
     "r":-4,
@@ -21,7 +15,7 @@ piece_table = {
 }
 
 
-def convert_fen(fen:str, board:Board):
+def convert_fen(fen:str, board):
     parts = fen.split(" ")
     ranks = parts[0].split("/")
     curr_square = 0
@@ -35,10 +29,9 @@ def convert_fen(fen:str, board:Board):
                 for i in range(empty_squares):
                     board.state[curr_square] = 0
                     curr_square+=1
-    if parts[1] == 'w':
-        board.white_to_move = True
-    else:
-        board.white_to_move = False
+
+
+    board.turn = 'w' if parts[1] == 'w' else 'b'
     
     board.turn = parts[1]
 
@@ -54,8 +47,13 @@ def convert_fen(fen:str, board:Board):
         board.castling_rights['bq'] = True
     
     if parts[3] != "-":
-        board.en_passant_square = parts[3]
-    
+        file_char = parts[3][0].lower()
+        rank_char = parts[3][1]
+        col = ord(file_char) - ord('a')
+        row = 8 - int(rank_char)
+        board.en_passant_target = row * 8 + col
+    else:
+        board.en_passant_target = None
 
-    board.move_n = parts[5]
+    board.move_n = int(parts[5])
 

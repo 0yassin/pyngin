@@ -15,7 +15,7 @@ running = True
 font = pygame.font.SysFont("Arial", 40)
 
 board = Board()
-position = "8/8/4R3/8/3n4/2n1N1n1/2Q1RP1P/K4N2 w - - 0 1"
+position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 convert_fen(position, board)
 
 gui_pieces_paths = {
@@ -96,6 +96,7 @@ while running:
                 screen.blit(gui_pieces_table.get(board.state[index]), (xpos_, ypos_))
 
     # print(selected_piece)
+    print(board.castling_rights)
     # print(selected_square)
 
     pygame.draw.rect(screen, "gray", (0,0, sq_size, screen.get_height()))
