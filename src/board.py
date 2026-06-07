@@ -1,6 +1,4 @@
-from moves import get_legal_moves
-import moves
-from moves import get_psudo_moves
+from moves import get_legal_moves, get_psudo_moves
 
 class Board:
     def __init__(self, state=None):
@@ -8,7 +6,6 @@ class Board:
             self.state:list[int] = [0]*64
         else:
             self.state = list(state)
-
 
         self.castling_rights = {
             'wk': True, 'wq': True,
@@ -79,7 +76,6 @@ class Board:
                 self.state[end] = 5 * color_sign
             else:
                 self.state[end] = piece_moving
-
         else:
             self.state[end] = piece_moving
         self.state[start] = 0
@@ -87,7 +83,6 @@ class Board:
         self.en_passant_target = next_ep_target
         self.move_n += 1 if self.turn == "b" else 0
         self.turn = "b" if self.turn == "w" else "w"
-
 
     def clone(self):
         new_board = Board()
@@ -97,3 +92,25 @@ class Board:
         new_board.move_n = self.move_n
         new_board.turn = self.turn
         return new_board
+
+    def is_in_check(self):
+        king_p = 6 if self.turn == 'w' else -6
+        king_sq = -1
+
+        for i in range(64):
+            if self.state[i] == king_p:
+                king_sq = i
+            else:
+                continue
+        if king_sq == -1: return False
+
+        og_turn = self.turn
+        self.turn = 'b' if og_turn == 'w' else 'w'
+        opp_moves = get_psudo_moves(self)
+        self.turn = og_turn
+
+        for move in opp_moves:
+            start, end = move
+            if end == king_sq:
+                return True
+        return False

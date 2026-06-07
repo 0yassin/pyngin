@@ -1,12 +1,18 @@
+from engine import get_engine_move
+import queue
+import threading
+import queue
 from converter import load_fen
 import pygame
 from board import Board
 from moves import is_current_turn_piece
+from evaluate import evaluate_position
 
 play_as = "w"
 dark = (0,0,0)
 light = (255,255,255)
 sq_size = 60
+depth = 3
 
 pygame.init()
 screen = pygame.display.set_mode((540, sq_size*8))
@@ -49,6 +55,14 @@ load_game_assets()
 selected_square = None
 selected_piece = (None, None)
 possible_moves = board.get_possible_moves()
+
+en_queue = queue.Queue()
+en_thinking = False
+
+def engine_worker_thread(board_clone, depth, communication_queue):
+    engine_move = get_engine_move(board_clone, depth)
+    communication_queue.put(engine_move)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -73,6 +87,26 @@ while running:
 
                         else:
                             selected_piece = (None, None)
+
+    if board.turn != play_as and not en_thinking and running:
+        if len(possible_moves) == 0:
+            print("Game Over!")
+        else: 
+            en_thinking = True
+            board_clone = board.clone()
+            threading.Thread(
+                target=engine_worker_thread,
+                args=(board_clone, depth, en_queue),
+                daemon=True
+            ).start()
+
+    if en_thinking and not en_queue.empty():
+        en_move = en_queue.get()
+        if en_move:
+            board.make_move(en_move)
+        possible_moves = board.get_possible_moves()
+        en_thinking = False
+
     screen.fill("purple")
     for r in range(8):
         for c in range(8):
