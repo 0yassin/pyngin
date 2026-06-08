@@ -23,7 +23,7 @@ running = True
 font = pygame.font.Font("assets/dogicapixel.ttf", 25)
 
 board = Board()
-position = "8/4b3/3kb3/5n2/8/8/4K3/8 w - - 0 1"
+position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 load_fen(position, board)
 
 game_history = [(tuple(board.state), board.turn)]
