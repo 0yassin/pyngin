@@ -16,14 +16,17 @@ def get_move_score(move, board):
     if moving_piece == 1:
         score += PST_PAWN[pst_index] * 2
     elif moving_piece == 2:
-        score = PST_KNIGHT[pst_index] * 2
+        score += PST_KNIGHT[pst_index] * 2
     elif moving_piece == 3:
-        score = PST_BISHOP[pst_index] * 2
+        score += PST_BISHOP[pst_index] * 2
     elif moving_piece == 4:
-        score = PST_ROOK[pst_index] * 2
+        score += PST_ROOK[pst_index] * 2
     elif moving_piece == 5:
-        score = PST_QUEEN[pst_index] * 2
-    return score if score > 0 else 0
+        score += PST_QUEEN[pst_index] * 2
+
+    # TODO: add king move bonuses
+
+    return score
 
 
 def get_knight_moves(board, index):
