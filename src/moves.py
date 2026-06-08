@@ -4,21 +4,17 @@ def get_move_score(move, board):
     start, end = move
     moving_piece = abs(board.state[start])
     victim_piece = abs(board.state[end])
+    score = 0
     if victim_piece != 0:
         score = (9999) + (victim_piece * 10) - moving_piece
         return score
     if moving_piece == 1:
         if end // 8 == 0 or end // 8 == 7:
-            score = 9999
-            return score
-        else:
-            score = PST_PAWN[end]*2 if PST_PAWN[end] > 0 else 0
-            return score
+            score += 9999
     piece_color = 1 if board.state[start] > 0 else -1
     pst_index = end if piece_color > 0 else (end ^ 56)
-    score = 0
     if moving_piece == 1:
-        score = PST_PAWN[pst_index] * 2
+        score += PST_PAWN[pst_index] * 2
     elif moving_piece == 2:
         score = PST_KNIGHT[pst_index] * 2
     elif moving_piece == 3:
@@ -280,3 +276,17 @@ def count_vision_squares(piece_index, board, offsets):
                 break
             prev_col = tar_col
     return count
+
+
+def translate_move(move):
+    st_row = move[0] // 8
+    end_row = move[1] // 8
+    st_col = move[0] % 8
+    end_col = move[1] % 8
+
+    st_file = chr(ord('a') + st_col)
+    st_rank = str(8 - st_row)
+    end_file = chr(ord('a') + end_col)
+    end_rank = str(8 - end_row)
+
+    return st_file + st_rank + end_file + end_rank

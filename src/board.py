@@ -1,3 +1,5 @@
+from moves import translate_move
+from chess import Move
 from moves import get_legal_moves, get_psudo_moves
 
 class Board:
@@ -14,16 +16,21 @@ class Board:
         self.en_passant_target = None
         self.move_n = 1
         self.turn = 'w'
+        self.game_state = "-"
+        self.pgn_node = None
 
     def get_possible_moves(self):
         return get_legal_moves(self)
         
-    def make_move(self,move):
-        # print(f"made move: {move}")
+    def make_move(self,move, pgn_game = None):
         start, end = move
         piece_moving = self.state[start]
 
         next_ep_target = None
+
+        if self.pgn_node is not None:
+            chess_move = Move.from_uci(translate_move(move))
+            self.pgn_node = self.pgn_node.add_main_variation(chess_move)
 
         if abs(piece_moving) == 6:
             if start == 60 and end == 62:
@@ -78,6 +85,11 @@ class Board:
                 self.state[end] = piece_moving
         else:
             self.state[end] = piece_moving
+
+        if pgn_game != None:
+            pgn_game.add_main_variation(Move.from_uci(translate_move(move)))
+
+
         self.state[start] = 0
 
         self.en_passant_target = next_ep_target
