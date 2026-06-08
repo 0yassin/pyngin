@@ -54,7 +54,7 @@ def evaluate_position(board):
 
     phase = min(phase, 24)
     final_score = ((mg_score * phase) + (eg_score * (24 - phase))) // 24
-    return final_score
+    return int(final_score)
 
 def get_relative_eval(board):
     eval = evaluate_position(board)

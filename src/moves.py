@@ -1,6 +1,6 @@
 from pieces import *
 
-def get_move_score(board, move):
+def get_move_score(move, board):
     start, end = move
     moving_piece = abs(board.state[start])
     victim_piece = abs(board.state[end])
@@ -14,19 +14,20 @@ def get_move_score(board, move):
         else:
             score = PST_PAWN[end]*2 if PST_PAWN[end] > 0 else 0
             return score
+    piece_color = 1 if board.state[start] > 0 else -1
+    pst_index = end if piece_color > 0 else (end ^ 56)
     score = 0
-    if moving_piece == 2:
-        score += PST_KNIGHT[end] * 2 if PST_KNIGHT[end]>0 else 0
-        return score
+    if moving_piece == 1:
+        score = PST_PAWN[pst_index] * 2
+    elif moving_piece == 2:
+        score = PST_KNIGHT[pst_index] * 2
     elif moving_piece == 3:
-        score += PST_BISHOP[end] * 2 if PST_BISHOP[end]>0 else 0
-        return score
+        score = PST_BISHOP[pst_index] * 2
     elif moving_piece == 4:
-        score += PST_ROOK[end] * 2 if PST_ROOK[end]>0 else 0
-        return score
+        score = PST_ROOK[pst_index] * 2
     elif moving_piece == 5:
-        score += PST_QUEEN[end] * 2 if PST_QUEEN[end] >0 else 0
-    return score
+        score = PST_QUEEN[pst_index] * 2
+    return score if score > 0 else 0
 
 
 def get_knight_moves(board, index):
@@ -245,10 +246,8 @@ def get_legal_moves(board):
                 if enemy_end == start or enemy_end == transit_square:
                     king_is_safe = False
                     break
-
         if king_is_safe:
             legal_moves.append(move)
-
         board.state = temp_state
         board.turn = curent_turn
     return legal_moves
