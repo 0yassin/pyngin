@@ -1,3 +1,34 @@
+from pieces import *
+
+def get_move_score(board, move):
+    start, end = move
+    moving_piece = abs(board.state[start])
+    victim_piece = abs(board.state[end])
+    if victim_piece != 0:
+        score = (9999) + (victim_piece * 10) - moving_piece
+        return score
+    if moving_piece == 1:
+        if end // 8 == 0 or end // 8 == 7:
+            score = 9999
+            return score
+        else:
+            score = PST_PAWN[end]*2 if PST_PAWN[end] > 0 else 0
+            return score
+    score = 0
+    if moving_piece == 2:
+        score += PST_KNIGHT[end] * 2 if PST_KNIGHT[end]>0 else 0
+        return score
+    elif moving_piece == 3:
+        score += PST_BISHOP[end] * 2 if PST_BISHOP[end]>0 else 0
+        return score
+    elif moving_piece == 4:
+        score += PST_ROOK[end] * 2 if PST_ROOK[end]>0 else 0
+        return score
+    elif moving_piece == 5:
+        score += PST_QUEEN[end] * 2 if PST_QUEEN[end] >0 else 0
+    return score
+
+
 def get_knight_moves(board, index):
     res = []
     offsets = [-17, -15, -10, -6, 6, 10, 15, 17]
@@ -230,3 +261,23 @@ def is_current_turn_piece(piece, turn):
         return True
     else:
         return False
+
+def count_vision_squares(piece_index, board, offsets):
+    count = 0
+    for offset in offsets:
+        tar_square = piece_index
+        prev_col = piece_index % 8
+        while True:
+            tar_square += offset
+            tar_col = tar_square % 8
+            if tar_square > 63 or tar_square < 0:
+                break
+            elif offset in [-8, 8] and tar_col != prev_col:
+                break  
+            elif offset in [-9, -7, 9, 7, 1, -1] and abs(tar_col - prev_col) != 1:
+                break
+            count += 1
+            if board.state[tar_square] != 0:
+                break
+            prev_col = tar_col
+    return count

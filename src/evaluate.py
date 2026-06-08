@@ -1,5 +1,5 @@
-
 from pieces import *
+from moves import count_vision_squares
 
 def evaluate_position(board):
     phase = 0
@@ -33,7 +33,8 @@ def evaluate_position(board):
 
         elif abs(piece) == 3:
             sq = count_vision_squares(i, board, BISHOP_OFFSETS)
-            b_score = sq * BISHOP_VISION_BONUS
+            PST_score = PST_BISHOP[i]
+            b_score = (sq * BISHOP_VISION_BONUS) + PST_score
             if piece>0:
                 mg_score += b_score
                 eg_score += b_score
@@ -43,7 +44,11 @@ def evaluate_position(board):
 
         elif abs(piece) == 4:
             sq = count_vision_squares(i, board, ROOK_OFFSETS)
-            b_score = sq * ROOK_VISION_BONUS
+            if board.turn == 'w':
+                PST_score = PST_ROOK[i]
+            else:
+                PST_score = PST_ROOK[((7 - (i // 8)) * 8) + (i % 8)]
+            b_score = (sq * ROOK_VISION_BONUS) + PST_score
             if piece>0:
                 mg_score += b_score
                 eg_score += b_score
@@ -53,16 +58,14 @@ def evaluate_position(board):
 
         elif abs(piece) == 5:
             sq = count_vision_squares(i, board, QUEEN_OFFSETS)
-            b_score = sq * QUEEN_VISION_BONUS
+            PST_score = PST_QUEEN[i]
+            b_score = (sq * QUEEN_VISION_BONUS) + PST_score
             if piece>0:
                 mg_score += b_score
                 eg_score += b_score
             else:
                 mg_score -= b_score
                 eg_score -= b_score
-
-
-
         elif abs(piece) == 6:
             if piece>0:
                 mg_score += PST_KING_MG[i] 
@@ -74,29 +77,7 @@ def evaluate_position(board):
 
     phase = min(phase, 24)
     final_score = ((mg_score * phase) + (eg_score * (24 - phase))) // 24
-
     return final_score
-
-def count_vision_squares(piece_index, board, offsets):
-    count = 0
-    for offset in offsets:
-        tar_square = piece_index
-        prev_col = piece_index % 8
-        while True:
-            tar_square += offset
-            tar_col = tar_square % 8
-            if tar_square > 63 or tar_square < 0:
-                break
-            elif offset in [-8, 8] and tar_col != prev_col:
-                break  
-            elif offset in [-9, -7, 9, 7, 1, -1] and abs(tar_col - prev_col) != 1:
-                break
-            count += 1
-            if board.state[tar_square] != 0:
-                break
-            prev_col = tar_col
-
-    return count
 
 def get_relative_eval(board):
     eval = evaluate_position(board)

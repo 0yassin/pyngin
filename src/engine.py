@@ -1,4 +1,4 @@
-from moves import get_legal_moves
+from moves import get_legal_moves, get_move_score
 from evaluate import get_relative_eval
 
 def get_engine_move(board, d):
@@ -8,6 +8,9 @@ def get_engine_move(board, d):
     legal_moves = get_legal_moves(board)
     if not legal_moves:
         return None
+
+    legal_moves.sort(key=lambda m:get_move_score(m, board), reverse=True)
+    
     for move in legal_moves:
         temp_board = board.clone()
         temp_board.make_move(move)
@@ -28,7 +31,7 @@ def negamax(board, d, alpha, beta, ply=0):
             return -999999 + ply
         else:
             return 0
-
+    legal_moves.sort(key=lambda m:get_move_score(m, board), reverse=True)
     max_eval = -float('inf')
     for move in legal_moves:
         temp_board = board.clone()
