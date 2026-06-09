@@ -25,6 +25,8 @@ def get_engine_move(board, d, game_history=None):
         alpha = max(alpha, score)
     return best_move
 
+#TODO: IMPLEMENT UNMAKE MOVE!!!
+
 def negamax(board, d, alpha, beta,ply=0, history=None):
     if history is None:
         history = []
@@ -49,15 +51,15 @@ def negamax(board, d, alpha, beta,ply=0, history=None):
 
     legal_moves.sort(key=lambda m:get_move_score(m, board), reverse=True)
     max_eval = -float('inf')
-    new_history = history + [current_position_id]
+    history.append(current_position_id)
     for move in legal_moves:
         temp_board = board.clone()
         temp_board.make_move(move)
-        evaluation = -negamax(temp_board, d - 1, -beta, -alpha, ply + 1, history=new_history)
+        evaluation = -negamax(temp_board, d - 1, -beta, -alpha, ply + 1, history=history)
         max_eval = max(max_eval, evaluation)
         alpha = max(alpha, evaluation)
-
         if alpha >= beta:
             break
-    return max_eval
 
+    history.pop()
+    return max_eval
