@@ -3,6 +3,14 @@ from moves import translate_move
 from chess import Move
 from moves import get_legal_moves
 
+CASTLING_MASKS = [15] * 64
+CASTLING_MASKS[60] = 12
+CASTLING_MASKS[63] = 14
+CASTLING_MASKS[56] = 13
+CASTLING_MASKS[4] = 3
+CASTLING_MASKS[7] = 11
+CASTLING_MASKS[0]  = 7
+
 class Board:
     def __init__(self, state=None):
         if state is None:
@@ -14,10 +22,7 @@ class Board:
             self.bk_index = self.state.index(-6)
             self.wk_index = self.state.index(6)
 
-        self.castling_rights = {
-            'wk': True, 'wq': True,
-            'bk': True, 'bq': True  
-        }
+        self.castling_rights = 15
         self.en_passant_target = None
         self.move_n = 1
         self.turn = 'w'
@@ -30,6 +35,16 @@ class Board:
     def make_move(self,move, pgn_game = None):
         start, end = move
         piece_moving = self.state[start]
+        captured_piece = self.state[end]
+
+        saved_state = (
+            piece_moving,
+            captured_piece,
+            self.castling_rights,
+            self.en_passant_target,
+            self.wk_index,
+            self.bk_index
+        )
 
         next_ep_target = None
 
@@ -44,53 +59,34 @@ class Board:
 
         if abs(piece_moving) == 6:
             if start == 60 and end == 62:
-                self.state[61] = self.state[63] # Move Rook from h1 to f1
+                self.state[61] = self.state[63]
                 self.state[63] = 0
             elif start == 60 and end == 58:
                 self.state[59] = self.state[56]
                 self.state[56] = 0
-
             elif start == 4 and end == 6:
                 self.state[5] = self.state[7]
                 self.state[7] = 0
-            
             elif start == 4 and end == 2:
                 self.state[3] = self.state[0]
                 self.state[0] = 0
 
-        if piece_moving == 6:
-            self.castling_rights['wk'] = False
-            self.castling_rights['wq'] = False
-        if piece_moving == -6:
-            self.castling_rights['bk'] = False
-            self.castling_rights['bq'] = False
-
-        if abs(piece_moving) == 4:
-            if start == 63: self.castling_rights['wk'] = False
-            if start == 56: self.castling_rights['wq'] = False
-            if start == 7: self.castling_rights['bk'] = False
-            if start == 0: self.castling_rights['bq'] = False
-
-        if end == 63: self.castling_rights['wk'] = False
-        if end == 56: self.castling_rights['wq'] = False
-        if end == 7: self.castling_rights['bk'] = False
-        if end == 0: self.castling_rights['bq'] = False
+        self.castling_rights &= CASTLING_MASKS[start] & CASTLING_MASKS[end]
 
         if abs(piece_moving) == 1:
-            start_row = start // 8
-            end_row = end // 8
+            start_row = start >> 3
+            end_row = end >> 3
             if abs(end_row - start_row) == 2:
-                next_ep_target = (start + end) // 2
+                next_ep_target = (start + end) >> 1
   
-
         if abs(piece_moving) == 1 and end == self.en_passant_target:
             victim_square = end + 8 if piece_moving > 0 else end - 8
             self.state[victim_square] = 0
 
         if abs(piece_moving) == 1:
-            if end // 8 == 0 or end // 8 == 7:
-                color_sign = 1 if piece_moving > 0 else -1
-                self.state[end] = 5 * color_sign
+            end_row = end >> 3
+            if end_row == 0 or end_row == 7:
+                self.state[end] = 5 if piece_moving > 0 else -5
             else:
                 self.state[end] = piece_moving
         else:
@@ -100,15 +96,44 @@ class Board:
             pgn_game.add_main_variation(Move.from_uci(translate_move(move)))
 
         self.state[start] = 0
-
         self.en_passant_target = next_ep_target
         self.move_n += 1 if self.turn == "b" else 0
         self.turn = "b" if self.turn == "w" else "w"
 
+        return saved_state
+
+    def unmake_move(self, move, saved_state):
+        start, end = move
+        piece_moving, captured_piece, old_castling, old_ep, old_wk, old_bk = saved_state
+        self.turn = "w" if self.turn == "b" else "b"
+        self.move_n -= 1 if self.turn == "b" else 0
+        self.en_passant_target = old_ep
+        self.wk_index = old_wk
+        self.bk_index = old_bk
+        self.castling_rights = old_castling
+        if abs(piece_moving) == 6 and abs(start - end) == 2:
+            if start == 60 and end == 62:
+                self.state[63] = self.state[61]
+                self.state[61] = 0
+            elif start == 60 and end == 58:
+                self.state[56] = self.state[59]
+                self.state[59] = 0
+            elif start == 4 and end == 6:
+                self.state[7] = self.state[5]
+                self.state[5] = 0
+            elif start == 4 and end == 2:
+                self.state[0] = self.state[3]
+                self.state[3] = 0
+        if abs(piece_moving) == 1 and end == old_ep:
+            victim_square = end + 8 if piece_moving > 0 else end - 8
+            self.state[victim_square] = -1 if piece_moving > 0 else 1
+        self.state[start] = piece_moving
+        self.state[end] = captured_piece
+
     def clone(self):
         new_board = Board()
         new_board.state = list(self.state)
-        new_board.castling_rights = dict(self.castling_rights)
+        new_board.castling_rights = self.castling_rights
         new_board.en_passant_target = self.en_passant_target
         new_board.move_n = self.move_n
         new_board.turn = self.turn

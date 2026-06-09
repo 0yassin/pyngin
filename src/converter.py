@@ -35,16 +35,16 @@ def load_fen(fen: str, board):
 
     board.turn = parts[1].lower() 
 
-    board.castling_rights = {
-        'wk': False, 'wq': False,
-        'bk': False, 'bq': False
-    }
-    
-    if parts[2] != "-":
-        if "K" in parts[2]: board.castling_rights['wk'] = True
-        if "Q" in parts[2]: board.castling_rights['wq'] = True
-        if "k" in parts[2]: board.castling_rights['bk'] = True
-        if "q" in parts[2]: board.castling_rights['bq'] = True
+    castling_str = parts[2]
+    mask = 0
+    if 'K' in castling_str: mask |= 1  # White King-side
+    if 'Q' in castling_str: mask |= 2  # White Queen-side
+    if 'k' in castling_str: mask |= 4  # Black King-side
+    if 'q' in castling_str: mask |= 8  # Black Queen-side
+
+    board.castling_rights = mask
+
+
     
     if parts[3] != "-":
         file_char = parts[3][0].lower()

@@ -9,10 +9,9 @@ def perft(d, board):
     lmoves = get_legal_moves(board)
     nodes = 0
     for lmove in lmoves:
-        temp_board = board.clone()
-        temp_board.make_move(lmove)
-
-        nodes += perft(d - 1, temp_board)
+        state_inf = board.make_move(lmove)
+        nodes += perft(d - 1, board)
+        board.unmake_move(lmove, state_inf)
     return nodes
 
 def perft_benchmark(board=None):
@@ -47,7 +46,7 @@ def perft_benchmark(board=None):
         error(f"PERFT at depth 3: FAILED {p}")
 
     start_time = time.time()
-    p = perft(4, board)
+    p = perft(5, board)
     elapsed = time.time() - start_time
     nps = int(p / elapsed) if elapsed > 0 else 0
     if p == 197281:
