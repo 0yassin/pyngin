@@ -1,3 +1,4 @@
+from converter import load_fen
 from board import Board
 from logging import error
 from moves import get_legal_moves
@@ -17,6 +18,7 @@ def perft(d, board):
 def perft_benchmark(board=None):
     if board is None:
         board = Board()
+    load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board)
     print("==========================================")
     start_time = time.time()
     p = perft(1, board)

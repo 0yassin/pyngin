@@ -126,7 +126,6 @@ def get_pawn_moves(board, index):
             if board.en_passant_target is not None and tar_square == board.en_passant_target:
                 res.append((index, tar_square))
             continue
-
         if is_current_turn_piece(board.state[tar_square], turn):
             continue
         res.append((index, tar_square))
@@ -172,8 +171,6 @@ def get_king_moves(board, index):
             res.append((4, 6))
         if board.castling_rights['bq'] and board.state[3] == 0 and board.state[2] == 0 and board.state[1] == 0:
             res.append((4, 2))
-
-
     start_col = index % 8
     for offset in offsets:
         tar_square = index + offset
@@ -212,44 +209,101 @@ def get_psudo_moves(board):
 
 def get_legal_moves(board):
     legal_moves = []
-    psuedo_moves = get_psudo_moves(board)
-    curent_turn = board.turn
-    opponent_turn = 'b' if board.turn == 'w' else 'w'
+    pseudo_moves = get_psudo_moves(board)
+    king_index = board.bk_index if board.turn == "b" else board.wk_index
+    opponent_color = 'b' if board.turn == 'w' else 'w'
+    ep_captured_piece = 0
 
-    for move in psuedo_moves:
+    for move in pseudo_moves:
         start, end = move
-        temp_state = list(board.state)
         piece_moving = board.state[start]
+        captured_piece = board.state[end]
         is_castling_move = (abs(piece_moving) == 6 and abs(start - end) == 2)
+        is_king_moving = (abs(piece_moving) == 6)
 
-        board.state[end] = board.state[start]
+        board.state[end] = piece_moving
         board.state[start] = 0
 
-        if abs(piece_moving) == 1 and (start % 8 != end % 8) and temp_state[end] == 0:
-            victim_square = end + 8 if piece_moving > 0 else end - 8
-            board.state[victim_square] = 0
-
-        board.turn = opponent_turn
-
-        king_value = 6 if curent_turn == "w" else -6
-        king_index = board.state.index(king_value)
-        enemy_responses = get_psudo_moves(board)
-        king_is_safe = True
-        for enemy_move in enemy_responses:
-            enemy_start, enemy_end = enemy_move
-            if enemy_end == king_index:
+        ep_victim_square = None
+        if abs(piece_moving) == 1 and (start % 8 != end % 8) and captured_piece == 0:
+            ep_victim_square = end + 8 if piece_moving > 0 else end - 8
+            ep_captured_piece = board.state[ep_victim_square]
+            board.state[ep_victim_square] = 0
+        temp_king_idx = end if is_king_moving else king_index
+        king_is_safe = not is_square_attacked(temp_king_idx, board, opponent_color)
+        if king_is_safe and is_castling_move:
+            transit_square = (start + end) // 2
+            if is_square_attacked(start, board, opponent_color) or \
+               is_square_attacked(transit_square, board, opponent_color):
                 king_is_safe = False
-                break
-            if is_castling_move:
-                transit_square = (start + end) // 2
-                if enemy_end == start or enemy_end == transit_square:
-                    king_is_safe = False
-                    break
         if king_is_safe:
             legal_moves.append(move)
-        board.state = temp_state
-        board.turn = curent_turn
+
+        board.state[start] = piece_moving
+        board.state[end] = captured_piece
+        if ep_victim_square is not None:
+            board.state[ep_victim_square] = ep_captured_piece
+
     return legal_moves
+
+def is_square_attacked(square, board, opp_color):
+    start_row = square // 8
+    start_col = square % 8
+    is_opp_white = (opp_color == "w")
+
+    kn_deltas = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
+    target_knight = 2 if is_opp_white else -2
+    
+    for dr, dc in kn_deltas:
+        r, c = start_row + dr, start_col + dc
+        if 0 <= r < 8 and 0 <= c < 8: 
+            if board.state[r * 8 + c] == target_knight:
+                return True
+
+    target_pawn = 1 if is_opp_white else -1
+    p_row_delta = 1 if is_opp_white else -1
+    
+    for p_col_delta in [-1, 1]:
+        r, c = start_row + p_row_delta, start_col + p_col_delta
+        if 0 <= r < 8 and 0 <= c < 8:
+            if board.state[r * 8 + c] == target_pawn:
+                return True
+
+    ortho_deltas = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    target_orthos = [4, 5] if is_opp_white else [-4, -5]
+    
+    for dr, dc in ortho_deltas:
+        r, c = start_row + dr, start_col + dc
+        while 0 <= r < 8 and 0 <= c < 8:
+            piece = board.state[r * 8 + c]
+            if piece != 0:
+                if piece in target_orthos:
+                    return True
+                break  
+            r += dr
+            c += dc
+
+    diag_deltas = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    target_diags = [3, 5] if is_opp_white else [-3, -5]
+    
+    for dr, dc in diag_deltas:
+        r, c = start_row + dr, start_col + dc
+        while 0 <= r < 8 and 0 <= c < 8:
+            piece = board.state[r * 8 + c]
+            if piece != 0:
+                if piece in target_diags:
+                    return True
+                break  # Ray is blocked
+            r += dr
+            c += dc
+    target_king = 6 if is_opp_white else -6
+    king_deltas = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    for dr, dc in king_deltas:
+        r, c = start_row + dr, start_col + dc
+        if 0 <= r < 8 and 0 <= c < 8:
+            if board.state[r * 8 + c] == target_king:
+                return True
+    return False
 
 def is_current_turn_piece(piece, turn):
     # piece > 0 means white

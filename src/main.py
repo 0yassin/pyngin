@@ -14,7 +14,7 @@ dark = (120, 79, 72)
 light = (226, 213, 161)
 sq_size = 60
 piece_size = 46
-depth = 3
+depth = 5
 hint_size = 24
 
 prpl = (64, 54, 65)

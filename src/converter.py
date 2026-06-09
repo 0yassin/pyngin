@@ -8,8 +8,10 @@ def load_fen(fen: str, board):
     
 
     while len(parts) < 6:
-        if len(parts) == 4: parts.append("0") 
-        elif len(parts) == 5: parts.append("1")
+        if len(parts) < 3: parts.append("-")
+        if len(parts) < 4 : parts.append("-")
+        if len(parts) < 5: parts.append("0")
+        if len(parts) < 6: parts.append("1")
         else: raise ValueError("Malformed FEN string: too few parts.")
 
 
@@ -19,6 +21,8 @@ def load_fen(fen: str, board):
         for char in rank:
             if char in piece_table:
                 board.state[curr_square] = piece_table[char]
+                if piece_table[char] == 6: board.wk_index = curr_square
+                elif piece_table[char] == -6: board.bk_index = curr_square
                 curr_square += 1
             elif char.isdigit():
                 empty_squares = int(char)
