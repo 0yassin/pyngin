@@ -24,6 +24,7 @@ screen = pygame.display.set_mode((sq_size*8+20, sq_size*8+20))
 clock = pygame.time.Clock()
 running = True
 font = pygame.font.Font("assets/dogicapixel.ttf", 24)
+font_ = pygame.font.Font("assets/dogicapixel.ttf", 16)
 
 board = Board()
 position = "8/2qk4/8/8/4K3/8/8/8 b - - 0 1"
@@ -157,6 +158,22 @@ while running:
             if piece_image:
                 offset = (sq_size - piece_size) // 2
                 screen.blit(piece_image, (xpos_+offset, ypos_+offset))
+            if r == 7:
+                if c % 2 == 0:
+                    color_ = light
+                else:
+                    color_ = dark
+                txt = font_.render(chr(c+97), True, color_)
+                txt_rect = txt.get_rect(center=(xpos_+45, ypos_+45))
+                screen.blit(txt, txt_rect)
+            if c == 0:
+                if r % 2 != 0:
+                    color_ = light
+                else:
+                    color_ = dark
+                txt = font_.render(f"{8-r}".upper(), True, color_)
+                txt_rect = txt.get_rect(center=(xpos_+15, ypos_+15))
+                screen.blit(txt, txt_rect)
 
     if board.game_state != '-':
         game.headers["Event"] = "a phenomenal display of skill issue" if board.game_state != play_as else "Friendly Match"
@@ -174,7 +191,7 @@ while running:
             screen.blit(l_text_surface, text_rect)
             game.headers["Results"] = "1-0"
             
-    print(game)
+    # print(game)
     pygame.display.flip()
     clock.tick(60)
 
