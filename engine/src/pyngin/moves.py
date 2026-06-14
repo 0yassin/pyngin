@@ -1,4 +1,4 @@
-from pieces import PST_PAWN, PST_KNIGHT, PST_BISHOP, PST_ROOK, PST_QUEEN
+from pyngin.pieces import PST_PAWN, PST_KNIGHT, PST_BISHOP, PST_ROOK, PST_QUEEN
 
 def get_move_score(move, board):
     start, end = move

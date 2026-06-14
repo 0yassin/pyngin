@@ -1,5 +1,5 @@
-from moves import get_legal_moves, get_move_score
-from evaluate import get_relative_eval
+from pyngin.moves import get_legal_moves, get_move_score
+from pyngin.evaluate import get_relative_eval
 
 def get_engine_move(board, d, game_history=None):
     if game_history == None:
@@ -24,8 +24,6 @@ def get_engine_move(board, d, game_history=None):
             best_move = move
         alpha = max(alpha, score)
     return best_move
-
-#TODO: IMPLEMENT UNMAKE MOVE!!!
 
 def negamax(board, d, alpha, beta,ply=0, history=None):
     if history is None:

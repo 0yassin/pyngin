@@ -1,7 +1,7 @@
-from converter import load_fen
-from board import Board
+from pyngin.converter import load_fen
+from pyngin.board import Board
 from logging import error
-from moves import get_legal_moves
+from pyngin.moves import get_legal_moves
 import time
 
 def perft(d, board):

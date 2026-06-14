@@ -1,5 +1,5 @@
-from pieces import *
-from moves import count_vision_squares
+from pyngin.pieces import *
+from pyngin.moves import count_vision_squares
 
 def evaluate_position(board):
     phase = 0

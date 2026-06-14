@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/pyngin/__init__.py
+src/pyngin/board.py
+src/pyngin/converter.py
+src/pyngin/debug_utils.py
+src/pyngin/engine.py
+src/pyngin/evaluate.py
+src/pyngin/moves.py
+src/pyngin/pieces.py
+src/pyngin.egg-info/PKG-INFO
+src/pyngin.egg-info/SOURCES.txt
+src/pyngin.egg-info/dependency_links.txt
+src/pyngin.egg-info/top_level.txt

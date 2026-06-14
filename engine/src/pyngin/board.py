@@ -1,7 +1,5 @@
-from moves import is_square_attacked
-from moves import translate_move
+from pyngin.moves import translate_move, is_square_attacked, get_legal_moves
 from chess import Move
-from moves import get_legal_moves
 
 CASTLING_MASKS = [15] * 64
 CASTLING_MASKS[60] = 12

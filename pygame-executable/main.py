@@ -4,10 +4,10 @@ import pygame
 import queue
 import threading
 import queue
-from converter import load_fen
-from board import Board
-from moves import is_current_turn_piece
-from engine import get_engine_move
+from pyngin.converter import load_fen
+from pyngin.board import Board
+from pyngin.moves import is_current_turn_piece
+from pyngin.engine import get_engine_move
 
 play_as = "w"
 dark = (120, 79, 72)
