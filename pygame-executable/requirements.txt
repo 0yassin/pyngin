@@ -1,0 +1,4 @@
+chess==1.11.2
+pygame-ce==2.5.7
+pyperclip==1.11.0
+python-chess==1.999
