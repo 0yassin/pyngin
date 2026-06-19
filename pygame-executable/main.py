@@ -58,6 +58,9 @@ en_queue = queue.Queue()
 en_thinking = False
 
 pimg_width = 16
+
+roook = pygame.image.load("assets/rook6.png").convert_alpha()
+pygame.display.set_icon(roook)
 pimg_height = 16
 
 def get_piece_img(row, col, type):
