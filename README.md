@@ -4,7 +4,8 @@
 pyngin is a chess engine written in python
 ## Demo
 ### You can play the engine by going to the website:
-- (coming soon)
+- [website](https://pyngin.netlify.app)
+- [source](https://github.com/0yassin/pyngin-website)
 
 ### Alternatively you can run it locally
 - step 1: clone the repo:
